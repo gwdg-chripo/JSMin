@@ -1,0 +1,32 @@
+==========
+= README =
+==========
+
+The JSON files for Packer in this repository contain comments (starting with //) for documentation and readability purposes. Since JSON does not cover comments by itself, the JSMin tool[1] is used to strip the comments from JSON files before passing them to packer. The privided script "packer_jsmin" does exactly that, simply use it as a replacement for the plain packer command whit the JSON scripts in this repository. Both commands (jsmin and packer_jsmin) should be included in PATH somewhere (e.g. /usr/local/bin).
+
+Use packer_jsmin as replacement for plain packer command:
+$ packer_jsmin validate my-packer-file.json
+$ packer_jsmin build my-packer-file.json
+
+
+===========
+= INSTALL =
+===========
+
+To install JSMin, simply execute:
+$ make all
+$ sudo make install
+
+All make targets:
+$ make all # Build JSMin
+$ make jsmin # Build JSMin
+$ make install # Build and install JSMin (installation might require root privileges)
+$ make clean # Clean up project, deletes jsmin executable
+
+
+==============
+= References =
+==============
+
+[1] https://github.com/douglascrockford/JSMin
+
