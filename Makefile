@@ -18,7 +18,7 @@ jsmin: jsmin.c
 install: all
 	test -d $(PREFIX)/bin || mkdir -p $(PREFIX)/bin
 	install -m 0755 jsmin $(PREFIX)/bin
-	install -m 0755 packer_jsmin $(PREFIX)/bin
+	install -m 0755 packer-jsmin $(PREFIX)/bin
 
 # Clean up directory
 .PHONY: clean

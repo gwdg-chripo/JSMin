@@ -4,9 +4,20 @@
 
 The JSON files for Packer in this repository contain comments (starting with //) for documentation and readability purposes. Since JSON does not cover comments by itself, the JSMin tool[1] is used to strip the comments from JSON files before passing them to packer. The privided script "packer_jsmin" does exactly that, simply use it as a replacement for the plain packer command whit the JSON scripts in this repository. Both commands (jsmin and packer_jsmin) should be included in PATH somewhere (e.g. /usr/local/bin).
 
-Use packer_jsmin as replacement for plain packer command:
+Use packer_jsmin as replacement for plain packer command, e.g.:
 $ packer_jsmin validate my-packer-file.json
-$ packer_jsmin build my-packer-file.json
+$ packer_jsmin build --only=qemu my-packer-file.json
+
+
+=======================================
+= GWDG Continuous Delivery Extensions =
+=======================================
+
+The packer_jsmin script now handles the PACKER_PROFILE and PACKER_INSTALL_RECOMMENDS shell variables and passes them to the packer command. This can be used to build different basebox profiles for the GWDG Continuous Delivery (CD) environment.
+
+For GWDG CD, it should be sufficient to set PACKER_PROFILE to either "minimal" (implies PACKER_INSTALL_RECOMMENDS=false) or "server" (implies PACKER_INSTALL_RECOMMENDS=true). You can override this behaviour by settings PACKER_INSTALL_RECOMMENDS in addition to PACKER_PROFILE. The default values are PACKER_PROFILE="server" and PACKER_INSTALL_RECOMMENDS=true.
+
+Please note that the corresponding Packer templates, preseed files and provisioning scripts need to be changed accordingly to make use of the PACKER_PROFILE and PACKER_INSTALL_RECOMMENDS variables. If your templates, preseed files and provisioning scripts do not care about these variables, packer_jsmin will simply process the comments in your template.
 
 
 ===========

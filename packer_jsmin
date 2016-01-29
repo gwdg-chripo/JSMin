@@ -1,2 +1,0 @@
-#!/bin/bash
-packer $1 <(jsmin <$2)

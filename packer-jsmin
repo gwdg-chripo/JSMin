@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Set packer profile to default if not specified
+PACKER_PROFILE_DEFAULT="server"
+if [ -z ${PACKER_PROFILE} ]; then
+  PACKER_PROFILE=${PACKER_PROFILE_DEFAULT}
+fi
+export PACKER_PROFILE
+
+# Set install recommends variable  to default if not specified
+PACKER_INSTALL_RECOMMENDS_DEFAULT="true"
+if [ -z ${PACKER_INSTALL_RECOMMENDS} ]; then
+  if [ "${PACKER_PROFILE}" == "minimal" ]; then
+    PACKER_INSTALL_RECOMMENDS="false"
+  else
+    PACKER_INSTALL_RECOMMENDS="${PACKER_INSTALL_RECOMMENDS_DEFAULT}"
+  fi
+elif [[ ${PACKER_INSTALL_RECOMMENDS} == true ]]; then
+  PACKER_INSTALL_RECOMMENDS="true"
+elif [[ ${PACKER_INSTALL_RECOMMENDS} == false ]]; then
+  PACKER_INSTALL_RECOMMENDS="false"
+elif [[ ! ${PACKER_INSTALL_RECOMMENDS} == "true" ]] && [[ ! ${PACKER_INSTALL_RECOMMENDS} == "false" ]]; then
+  echo "Error: the provided PACKER_INSTALL_RECOMMENDS value (\"${PACKER_INSTALL_RECOMMENDS}\") does not evaluate to \"true\" or \"false\"."
+  exit
+fi
+export PACKER_INSTALL_RECOMMENDS
+
+# Set packer cache to default if not specified
+PACKER_CACHE_DIR_DEFAULT="${HOME}/.packer_cache"
+if [ -z ${PACKER_CACHE_DIR} ]; then
+  PACKER_CACHE_DIR=${PACKER_CACHE_DIR_DEFAULT}
+fi
+export PACKER_CACHE_DIR
+
+# Parse command line arguments
+ARGS="" # packer arguments starting with "-" or "--", e.g. --only=qemu
+CMD="" # packer command, e.g. "validate" or "build"
+TEMPLATE="" # packer JSON template file name
+
+# Get packer command, arguments and template
+for VAR in $@; do
+  if [[ ${VAR} =~ ^[\-]+.* ]]; then
+    ARGS="${ARGS} ${VAR}"
+  elif [ -z "${CMD}" ]; then
+    CMD=${VAR}
+  else
+    TEMPLATE=${VAR}
+  fi
+done
+
+# Check packer command and template variables
+RUN_PACKER=true
+if [ -z ${CMD} ]; then
+  echo "Error: please provide a packer command."
+  RUN_PACKER=false
+fi
+if [ -z ${TEMPLATE} ]; then
+  echo "Error: please provide a packer template."
+  RUN_PACKER=false
+fi
+
+# Run packer or exit
+if ${RUN_PACKER}; then
+  packer ${CMD} ${ARGS} <(jsmin <${TEMPLATE})
+else
+  echo "Exiting."
+  exit
+fi
