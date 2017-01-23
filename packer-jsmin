@@ -6,6 +6,9 @@ export PACKER_VERSION="${PACKER_VERSION:-1.0.0-UNSTABLE}"
 # Set VM image profile to "server" if not specified
 export PACKER_PROFILE="${PACKER_PROFILE:-server}"
 
+# Set proxy (could be empty)
+export PACKER_PROXY="${PACKER_PROXY}"
+
 # Set install recommends variable to default if not specified
 if [ "${PACKER_PROFILE}" == "minimal" ]; then
   export PACKER_INSTALL_RECOMMENDS="${PACKER_INSTALL_RECOMMENDS:-false}"
