@@ -9,6 +9,10 @@ export PACKER_PROFILE="${PACKER_PROFILE:-server}"
 # Set proxy (could be empty)
 export PACKER_PROXY="${PACKER_PROXY}"
 
+# Set ISO URL (could be empty if specified in template)
+export PACKER_ISO_URL="${PACKER_ISO_URL}"
+
+# Set install recommends variable to default if not specified
 # Set install recommends variable to default if not specified
 if [ "${PACKER_PROFILE}" == "minimal" ]; then
   export PACKER_INSTALL_RECOMMENDS="${PACKER_INSTALL_RECOMMENDS:-false}"
