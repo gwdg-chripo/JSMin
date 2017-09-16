@@ -12,7 +12,9 @@ export PACKER_PROXY="${PACKER_PROXY}"
 # Set ISO URL (could be empty if specified in template)
 export PACKER_ISO_URL="${PACKER_ISO_URL}"
 
-# Set install recommends variable to default if not specified
+# Set lower key delay interval to speed up boot command typing
+export PACKER_KEY_INTERVAL="10ms"
+
 # Set install recommends variable to default if not specified
 if [ "${PACKER_PROFILE}" == "minimal" ]; then
   export PACKER_INSTALL_RECOMMENDS="${PACKER_INSTALL_RECOMMENDS:-false}"
