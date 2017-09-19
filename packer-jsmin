@@ -2,41 +2,8 @@
 set -eu
 set -o pipefail
 
-function version_ge() { test "$(printf '%s\n' "$@" | sort -rV | head -n 1)" == "$1"; }
-
-PACKER_BINARY_VERSION=$(packer version | awk '{print $NF}')
-PACKER_BINARY_MIN_VERSION="v1.1.0"
-
-if ! version_ge ${PACKER_BINARY_VERSION} ${PACKER_BINARY_MIN_VERSION}; then
-  echo "ERROR: Packer version '${PACKER_BINARY_MIN_VERSION}' needed, please update your Packer binary (your current version is '${PACKER_BINARY_VERSION}'). Exiting."
-  exit 1
-fi
-
-# Set VM image version to "1.0.0-UNSTABLE" if not specified
-export PACKER_VERSION="${PACKER_VERSION:-1.0.0-UNSTABLE}"
-
-# Set VM image profile to "server" if not specified
-export PACKER_PROFILE="${PACKER_PROFILE:-server}"
-
-# Set proxy (could be empty)
-export PACKER_PROXY="${PACKER_PROXY:-}"
-
-# Set ISO URL (could be empty if specified in template)
-export PACKER_ISO_URL="${PACKER_ISO_URL:-}"
-
 # Set lower key delay interval to speed up boot command typing
 export PACKER_KEY_INTERVAL="10ms"
-
-# Set install recommends variable to default if not specified
-if [ "${PACKER_PROFILE}" == "minimal" ]; then
-  export PACKER_INSTALL_RECOMMENDS="${PACKER_INSTALL_RECOMMENDS:-false}"
-else
-  export PACKER_INSTALL_RECOMMENDS="${PACKER_INSTALL_RECOMMENDS:-true}"
-fi
-if [ ! ${PACKER_INSTALL_RECOMMENDS} == "true" ] && [ ! ${PACKER_INSTALL_RECOMMENDS} == "false" ]; then
-  echo "Error: the provided PACKER_INSTALL_RECOMMENDS value (\"${PACKER_INSTALL_RECOMMENDS}\") does not evaluate to \"true\" or \"false\"."
-  exit 1
-fi
 
 # Set packer cache to default if not specified
 PACKER_DEFAULT_CACHE_DIR=${HOME:-/tmp}/.packer_cache
@@ -44,21 +11,15 @@ export PACKER_CACHE_DIR="${PACKER_CACHE_DIR:-${PACKER_DEFAULT_CACHE_DIR}}"
 
 # Parse command line arguments
 ARGS="${@:1:($#-1)}" # packer command and arguments starting with "-" or "--", e.g. 'build --only=qemu'
-TEMPLATE_FULL="${@:$#}" # full path to packer JSON template file name
-BASEDIR=`dirname $TEMPLATE_FULL` # directory of packer JSON template file (if any)
-TEMPLATE=`basename $TEMPLATE_FULL` # packer JSON template file
+TEMPLATE_PATH="${@:$#}" # full path to packer JSON template file name
 
-# Check packer command and template variables
-RUN_PACKER=true
-if [ -z ${TEMPLATE_FULL} ] || [ ! -f ${TEMPLATE_FULL} ]; then
-  echo "Error: please provide a packer template."
-  RUN_PACKER=false
-fi
-
-# Run packer or exit
-if ${RUN_PACKER}; then
-  (cd ${BASEDIR} ; packer ${ARGS} <(jsmin <${TEMPLATE}))
-else
-  echo "Exiting."
+# Check provided template argument
+if [ -z ${TEMPLATE_PATH} ] || [ ! -f ${TEMPLATE_PATH} ]; then
+  packer ${ARGS}
   exit 1
 fi
+
+# Run packer
+cd $(dirname ${TEMPLATE_PATH})
+(packer ${ARGS} <(jsmin <$(basename ${TEMPLATE_PATH})))
+cd - > /dev/null
